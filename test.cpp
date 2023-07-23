@@ -1,26 +1,13 @@
 #include<vector>
-#include<memory>
 #include <iostream>
 #include<functional>
-#include<thread>
-#include<condition_variable>
-#include<mutex>
-#include<queue>
-#include<future>
-#include<string>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include<unistd.h>
-#include <arpa/inet.h>
-#include<pthread.h>
 #include "Thread/threadpool.h"
-#include "WebServer/WebServer.h"
 
 
 template <typename T>
 void print(T a)
 {
-   std::cout << "number is:"<<a << std::endl;
+   std::cout << "number is:"<<a <<std::endl;
 }
 
 int main(int argc,char* args[]){
@@ -37,6 +24,9 @@ int main(int argc,char* args[]){
       port_= std::stod(std::string(args[1]));
    }
    
-  WebServer web(port_, 10);
-  web.Run();
+//   WebServer web(port_, 10);
+//   web.Run();
+  ThreadPool* TH=new ThreadPool(20);
+  auto f = std::bind(print<int>, 7);
+  TH->submit(f);
 }

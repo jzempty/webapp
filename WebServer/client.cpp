@@ -43,7 +43,7 @@ int main(int argc,char* args[]){
          std::cout << "fail to send";
          exit(-1);
          }else{
-            std::cout << "success to send:"<<len<<"sta"<<sta;
+            std::cout << "\nsuccess to send:"<<len<<"\nsta"<<sta;
          }
       }
 }
