@@ -3,11 +3,14 @@
 #include<iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include<unistd.h>
 #include <arpa/inet.h>
 #include<pthread.h>
-
+#include<bits/stdc++.h>
 #include "../Thread/threadpool.h"
 #include "../IO/epoll.h"
+#include "../Buffer/buffer.h"
+#include "../Http/HttpConnection.h"
 
 class WebServer{
    private:

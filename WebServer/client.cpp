@@ -19,7 +19,7 @@ int main(int argc,char* args[]){
       std::cout << "fail to set a socket";
    }
    struct sockaddr_in addr;
-   inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr.s_addr);
+   inet_pton(AF_INET, "192.168.146.128", &addr.sin_addr.s_addr);
    addr.sin_family = AF_INET;
    addr.sin_port = htons(port);
 
@@ -32,7 +32,7 @@ int main(int argc,char* args[]){
       perror("connect");
       exit(-1);
    }
-      const char buf[1024] = "this a massege from client\n";
+      const char buf[50] = "this a\r\n ma\r\nssege from clien\r\n\r\n";
       int len = sizeof(buf);
       while(1){
       sleep(1);

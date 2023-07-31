@@ -19,23 +19,24 @@ void WebServer::Run()
    {
       std::cout << "============================";
       std::cout << "Server Start!";
-      std::cout << "============================";
+      std::cout << "";
       std::cout << std::endl;
    }
-   Epoll_->Epoll_add(listenFd, EPOLLIN | EPOLLLT);
+   Epoll_->Epoll_add(listenFd, EPOLLIN | EPOLLET);
    while (1 && !IsClose_)
    {
       int evcnt = Epoll_->Epoll_Wait();
       std::vector<struct epoll_event> evs;
-      evs = std::move(Epoll_->Get_Event());
+      evs = Epoll_->Get_Event();
       auto pev = [&]()
          {
             for (int i = 0; i < evcnt;i++){
-               std::cout << "\n\nfd=\t" << evs[i].data.fd << "\tevents\t" << evs[i].events << "len" << evcnt;
+               std::cout << "fd=" << evs[i].data.fd << "\tevents=" << evs[i].events << "\tlen=" << evcnt<<"\n";
             }
          };
+      
       pev();
-
+      std::cout << "\n";
       for (int i = 0; i < evcnt; i++)
       {
          int fd = evs[i].data.fd;
@@ -79,10 +80,23 @@ void WebServer::Run()
 }
 void WebServer::HandleRead(int acceptFd)
 {
+   // handle a httprequest;
+   CycleBuffer buf(acceptFd);
+
+   HttpConnection connect_(acceptFd);
    while (1)
    {
-      char buf[1024];
-      int ret = read(acceptFd, buf, sizeof(buf));
+      int ret=connect_.ParaseHttpRequest();
+      // int ret=buf.write();
+      // std::vector<std::string> h = buf.ReadHttpHeader();
+      // HttpRequest HQ;
+      // HQ.ParaseHeader(h);
+      // string body;
+      // buf.readbyte(body, HQ.GetContentLength());
+      // HQ.ParaseBody(body);
+      // std::cout << "\nshowHttp\n";
+      // HQ.ShowHttp();
+      // std::cout << "\nFinishShowHttp\n";
       if (ret == -1)
       {
          perror("read error");
@@ -90,14 +104,13 @@ void WebServer::HandleRead(int acceptFd)
       }
       if(ret==0){
          Epoll_->Epoll_Del(acceptFd);
-         std::cout << "acceptFd" << acceptFd << " is closed\n";
+         std::cout << "\nacceptFd" << acceptFd << " is closed\n";
          return;
       }
       else if (ret > 0)
       {
-         // std::cout << "data from client" << std::endl;
- 
-        std::cout << "acceptFd" << acceptFd << "\nbuf=" << buf;
+         cout << "\nread size is:" << ret << "\n";
+// std::cout << "\nacceptFd" << acceptFd<< "\tbuffersize="<< buf.getbuffersize() << "\nbuf=" << buf.readall();
       }
    }
 }
@@ -110,7 +123,8 @@ void WebServer::HandleListen()
    struct sockaddr_in addr;
    socklen_t len = sizeof(addr);
    int acceptFd = accept(listenFd, (struct sockaddr *)&addr, &len);
-   Epoll_->Epoll_add(acceptFd, EPOLLIN);
+   Epoll_->Epoll_add(acceptFd, EPOLLIN|EPOLLET);
+   
    std::cout << "HandleListen" << acceptFd << "\n";
 }
 // InitSocket return true/false in case of true/false
@@ -127,7 +141,7 @@ bool WebServer::Init()
    }
    addr.sin_family = AF_INET;
    addr.sin_port = htons(port_);
-   addr.sin_addr.s_addr = htonl(INADDR_ANY);
+   addr.sin_addr.s_addr = htonl(0);
 
    ret = bind(listenFd, (struct sockaddr *)&addr, sizeof(addr));
    if (ret == -1)
@@ -136,7 +150,8 @@ bool WebServer::Init()
       perror("bind");
       return false;
    }
-   ret = listen(listenFd, 6); //_n is the max of the sum of noconnection and conncted
+   ret = listen(listenFd, 6); 
+   //_n is the max of the sum of noconnection and conncted
    if (ret == -1)
    {
       std::cout << "listen fail" << std::endl;

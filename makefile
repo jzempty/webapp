@@ -1,5 +1,5 @@
 obj1=WebServer/client.cpp
-obj2=main.cpp WebServer/WebServer.cpp
+obj2=main.cpp WebServer/WebServer.cpp 
 
 
 Server:${obj2}
